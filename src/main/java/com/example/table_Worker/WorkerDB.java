@@ -12,12 +12,12 @@ public class WorkerDB {
 
     public List<Worker> getAllWorker() {
         Connection connection;
-        Statement statement;
+        PreparedStatement preparedStatement;
         List<Worker> workers = new ArrayList();
         try {
             connection = DriverManager.getConnection(Database.getConnectionDB(), Database.getUserDB(), Database.getPasswordDB());
-            statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM worker");
+            preparedStatement = connection.prepareStatement("SELECT * FROM worker");
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 int id = resultSet.getInt(1);

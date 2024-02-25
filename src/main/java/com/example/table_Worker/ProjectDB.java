@@ -11,13 +11,13 @@ public class ProjectDB {
 
     public List<Project> getAllProject() {
         Connection connection;
-        Statement statement;
+        PreparedStatement preparedStatement;
         List<Project> projects = new ArrayList();
 
         try {
             connection = DriverManager.getConnection(Database.getConnectionDB(), Database.getUserDB(), Database.getPasswordDB());
-            statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM project");
+            preparedStatement = connection.prepareStatement("SELECT * FROM project");
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 int id = resultSet.getInt(1);

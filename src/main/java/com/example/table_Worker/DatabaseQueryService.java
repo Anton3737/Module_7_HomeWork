@@ -26,11 +26,10 @@ public class DatabaseQueryService {
 
     public static List<Project> getLongestProject() {
         Connection connection;
-        Statement statement;
+        PreparedStatement preparedStatement;
         List<Project> projectList = new ArrayList();
         try {
             connection = DriverManager.getConnection(Database.getConnectionDB(), Database.getUserDB(), Database.getPasswordDB());
-            statement = connection.createStatement();
             String longestProject = "SELECT client.NAME                                                         AS NAME,\n" +
                     "       SUM(EXTRACT(DAY FROM AGE(project.FINISH_DATE, project.START_DATE))) AS MONTH_COUNT\n" +
                     "FROM client client\n" +
@@ -38,7 +37,8 @@ public class DatabaseQueryService {
                     "GROUP BY client.ID, client.NAME\n" +
                     "ORDER BY MONTH_COUNT DESC\n" +
                     "LIMIT 1;";
-            ResultSet resultSet = statement.executeQuery(longestProject);
+            preparedStatement = connection.prepareStatement(longestProject);
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 String name = resultSet.getString("NAME");
@@ -57,11 +57,10 @@ public class DatabaseQueryService {
 
     public static List<Project> getCountProjectsOnClients() {
         Connection connection;
-        Statement statement;
+        PreparedStatement preparedStatement;
         List<Project> projectList = new ArrayList();
         try {
             connection = DriverManager.getConnection(Database.getConnectionDB(), Database.getUserDB(), Database.getPasswordDB());
-            statement = connection.createStatement();
             String longestProject = "SELECT client.NAME       AS NAME,\n" +
                     "       COUNT(project.ID) AS PROJECT_COUNT\n" +
                     "FROM client client\n" +
@@ -70,7 +69,8 @@ public class DatabaseQueryService {
                     "GROUP BY client.ID, client.NAME\n" +
                     "ORDER BY PROJECT_COUNT DESC\n" +
                     "LIMIT 1;";
-            ResultSet resultSet = statement.executeQuery(longestProject);
+            preparedStatement = connection.prepareStatement(longestProject);
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 String name = resultSet.getString("NAME");
@@ -89,13 +89,13 @@ public class DatabaseQueryService {
 
     public static List<Worker> getMaxSalaryWorkers() {
         Connection connection;
-        Statement statement;
+        PreparedStatement preparedStatement;
         List<Worker> workers = new ArrayList();
         try {
             connection = DriverManager.getConnection(Database.getConnectionDB(), Database.getUserDB(), Database.getPasswordDB());
-            statement = connection.createStatement();
             String maxSalaryQuery = "SELECT NAME, SALARY FROM worker WHERE SALARY = (SELECT MAX(SALARY) FROM worker)";
-            ResultSet resultSet = statement.executeQuery(maxSalaryQuery);
+            preparedStatement = connection.prepareStatement(maxSalaryQuery);
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 String name = resultSet.getString("NAME");
@@ -113,11 +113,11 @@ public class DatabaseQueryService {
 
     public static List<Project> getSummaryOfProjects() {
         Connection connection;
-        Statement statement;
+        PreparedStatement preparedStatement;
         List<Project> projectPriceList = new ArrayList();
         try {
             connection = DriverManager.getConnection(Database.getConnectionDB(), Database.getUserDB(), Database.getPasswordDB());
-            statement = connection.createStatement();
+
             String selectSumForProjects = "SELECT project.id AS project, " +
                     "client.name, " +
                     "(EXTRACT(MONTH FROM AGE(project.finish_date, project.start_date)) * SUM(worker.salary)) AS price " +
@@ -127,7 +127,8 @@ public class DatabaseQueryService {
                     "JOIN worker ON project_worker.worker_id = worker.id " +
                     "GROUP BY project.id, client.name, project.start_date, project.finish_date " +
                     "ORDER BY price DESC";
-            ResultSet resultSet = statement.executeQuery(selectSumForProjects);
+            preparedStatement = connection.prepareStatement(selectSumForProjects);
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 String name = resultSet.getString("NAME");
@@ -145,11 +146,10 @@ public class DatabaseQueryService {
 
     public static List<Worker> getWorkersWhoAreOldestAndYoungest() {
         Connection connection;
-        Statement statement;
+        PreparedStatement preparedStatement;
         List<Worker> workers = new ArrayList();
         try {
             connection = DriverManager.getConnection(Database.getConnectionDB(), Database.getUserDB(), Database.getPasswordDB());
-            statement = connection.createStatement();
             String youngestAndOlderWorkers = "WITH RankedWorkers AS (SELECT NAME, BIRTHDAY, " +
                     "RANK() OVER (ORDER BY BIRTHDAY ASC) AS YoungestRank, " +
                     "RANK() OVER (ORDER BY BIRTHDAY DESC) AS OldestRank " +
@@ -158,7 +158,9 @@ public class DatabaseQueryService {
                     "NAME, BIRTHDAY " +
                     "FROM RankedWorkers " +
                     "WHERE YoungestRank = 1 OR OldestRank = 1";
-            ResultSet resultSet = statement.executeQuery(youngestAndOlderWorkers);
+            preparedStatement = connection.prepareStatement(youngestAndOlderWorkers);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
 
